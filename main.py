@@ -130,6 +130,37 @@ async def whatsapp_webhook(
 
     return "OK"
 
+from services.gemini_service import GeminiService
+
+def daily_productivity_briefing() -> dict:
+    # Send Slack summary message
+    slack = SlackSkill()
+    slack_res = slack.send_slack_message("#general", "🌅 Good morning! Starting your daily briefing and activating deep work mode.")
+
+    # Create Toggl time entry for 2-hour deep work
+    toggl = TogglSkill()
+    toggl_res = toggl.start_timer("Deep Work - Morning Briefing", 7200, "0000000")
+
+    # Use Gemini to generate motivational plan
+    gemini = GeminiService()
+    ai_plan = gemini.generate_response("Give me a short, highly motivational 3-sentence productivity plan for the day.")
+
+    # Return combined response
+    return {
+        "message": "Morning briefing executed successfully",
+        "slack_status": slack_res,
+        "deep_work_timer": toggl_res,
+        "ai_plan": ai_plan
+    }
+
+@app.post("/morning-briefing")
+async def morning_briefing():
+    try:
+        result = daily_productivity_briefing()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=settings.api_port)

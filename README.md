@@ -61,3 +61,21 @@ ai-productivity-orchestrator/
 - `POST /start-timer` - Start a timer via Toggl skill
 - `POST /slack-notify` - Send a message via Slack skill
 - `POST /ai-process` - Process a natural language instruction via AI Router
+- `POST /send-email` - Send an email via SMTP
+- `POST /whatsapp-webhook` - Twilio-compatible WhatsApp webhook to execute Smart Productivity Automation or query AI Router
+
+## Set Up WhatsApp/Twilio Webhook (Optional)
+
+1. **Start ngrok** to expose your local server to the internet:
+   ```bash
+   ngrok http 8000
+   ```
+2. **Copy the Forwarding URL** from ngrok (e.g., `https://abcd1234.ngrok-free.app`).
+3. **Configure Twilio:**
+   - In your Twilio WhatsApp Sandbox, locate the "WHEN A MESSAGE COMES IN" field.
+   - Paste `[YOUR_NGROK_URL]/whatsapp-webhook`.
+   - Save the configuration.
+4. **Environment Variables:** Provide `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_WHATSAPP_NUMBER` in your `.env`.
+5. Send a WhatsApp message to your Twilio number:
+   - Example 1: `Plan my day` (routes to Claude/Gemini)
+   - Example 2: `start 2 hour deep work` (routes to Toggl and Slack, bypassing AI)
