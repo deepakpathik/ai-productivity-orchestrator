@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     slack_bot_token: Optional[str] = None
     gemini_api_key: Optional[str] = None
     claude_api_key: Optional[str] = None
+    
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: Optional[str] = None
+    smtp_password: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

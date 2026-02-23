@@ -69,6 +69,22 @@ async def ai_process(request: AIProcessRequest):
         "response": result["response"]
     }
 
+from skills.email_skill import EmailSkill
+
+class EmailRequest(BaseModel):
+    to_address: str
+    subject: str
+    body: str
+
+@app.post("/send-email")
+async def send_email(request: EmailRequest):
+    email_skill = EmailSkill()
+    result = email_skill.send_email(request.to_address, request.subject, request.body)
+    
+    if result.get("success"):
+        return {"status": "success", "message": result.get("message")}
+    raise HTTPException(status_code=400, detail=f"Failed to send email: {result.get('error')}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=settings.api_port)
