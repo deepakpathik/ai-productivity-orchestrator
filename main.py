@@ -1,6 +1,6 @@
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Form
-from fastapi.responses import PlainTextResponse
+from fastapi import FastAPI, HTTPException, Form, Request
+from fastapi.responses import PlainTextResponse, JSONResponse
 from twilio.rest import Client
 from pydantic import BaseModel
 from config import settings
@@ -59,7 +59,48 @@ async def slack_notify(request: SlackNotificationRequest):
         return {"status": "success", "message": f"Notification sent to {target_channel}"}
     raise HTTPException(status_code=400, detail=f"Failed to send Slack message: {result.get('error')}")
 
-from skills.ai_router import AIRouter
+from services.gemini_service import GeminiService
+
+SLACK_BOT_SYSTEM_PROMPT = """You are DeepakClaw, a smart and friendly AI productivity assistant built by Deepak Pathik. 
+You live inside a Slack workspace and help team members with questions, brainstorming, coding help, and productivity tips.
+You are NOT a generic AI model. You are DeepakClaw — a custom-built assistant integrated into Slack.
+Keep your replies concise, helpful, and conversational. Use a professional but approachable tone.
+If someone asks who you are, tell them you are DeepakClaw, built by Deepak Pathik as part of the AI Productivity Orchestrator project.
+Never say you are trained by Google, OpenAI, or Anthropic. You are DeepakClaw."""
+
+processed_events = set()
+
+@app.post("/slack/events")
+async def slack_events(request: Request):
+    payload = await request.json()
+
+    if payload.get("type") == "url_verification":
+        return JSONResponse({"challenge": payload.get("challenge")})
+
+    if payload.get("type") == "event_callback":
+        event = payload.get("event", {})
+        
+        event_id = payload.get("event_id", "")
+        if event_id in processed_events:
+            return JSONResponse({"status": "duplicate"})
+        processed_events.add(event_id)
+        
+        if event.get("bot_id") or event.get("subtype"):
+            return JSONResponse({"status": "ignored"})
+        
+        if event.get("type") in ("app_mention", "message"):
+            user_message = event.get("text", "")
+            channel_id = event.get("channel")
+            
+            clean_message = user_message.split(">", 1)[-1].strip() if ">" in user_message else user_message
+            
+            gemini = GeminiService()
+            ai_response = gemini.generate_response(clean_message, system_prompt=SLACK_BOT_SYSTEM_PROMPT)
+            
+            slack_skill = SlackSkill()
+            slack_skill.send_slack_message(channel_id, ai_response)
+            
+    return JSONResponse({"status": "ok"})
 
 @app.post("/ai-process")
 async def ai_process(request: AIProcessRequest):
