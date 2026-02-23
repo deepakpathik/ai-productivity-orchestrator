@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     smtp_user: Optional[str] = None
     smtp_password: Optional[str] = None
 
+    twilio_account_sid: Optional[str] = None
+    twilio_auth_token: Optional[str] = None
+    twilio_whatsapp_number: Optional[str] = None
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 settings = Settings()

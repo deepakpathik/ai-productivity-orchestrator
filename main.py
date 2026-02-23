@@ -1,5 +1,7 @@
 from typing import Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Form
+from fastapi.responses import PlainTextResponse
+from twilio.rest import Client
 from pydantic import BaseModel
 from config import settings
 from skills.toggl_skill import TogglSkill
@@ -88,33 +90,45 @@ async def send_email(request: EmailRequest):
 from utils.logger import get_logger
 logger = get_logger(__name__)
 
-class WhatsAppWebhookRequest(BaseModel):
-    message: str
-    from_number: str
 
-@app.post("/whatsapp-webhook")
-async def whatsapp_webhook(request: WhatsAppWebhookRequest):
-    """
-    Mock endpoint for receiving WhatsApp messages.
-    In production, this would use Twilio's incoming webhook payload structure
-    and verify the request signature to ensure it comes from Twilio.
-    """
-    logger.info(f"Received WhatsApp message from {request.from_number}: {request.message}")
-    
-    router = AIRouter()
-    # Pass message to AI Router
-    result = router.process_text(request.message)
-    
-    # In a real Twilio setup, we would return TwiML here to respond directly,
-    # or use the Twilio REST API to send a message back asynchronously.
-    return {
-        "status": "success",
-        "mock_response": {
-            "to": request.from_number,
-            "message": result["response"],
-            "model_used": result["model_used"]
-        }
-    }
+@app.post("/whatsapp-webhook", response_class=PlainTextResponse)
+async def whatsapp_webhook(
+    From: str = Form(...),
+    Body: str = Form(...)
+):
+    user_message = Body
+
+    # Smart Productivity Automation
+    if "start" in user_message.lower():
+        toggl_skill = TogglSkill()
+        slack_skill = SlackSkill()
+        
+        # Toggl
+        toggl_skill.start_timer("Deep Work", 7200, "0000000")
+        
+        # Slack
+        slack_skill.send_slack_message("#general", f"🚀 Started 2 hours of Deep Work via WhatsApp! Task: {user_message}")
+        
+        ai_response = f"✅ Started deep work timer for 2 hours and notified Slack!\n\nOriginal request: {user_message}"
+    else:
+        # Call AI router
+        router = AIRouter()
+        result = router.process_text(user_message)
+        ai_response = result["response"]
+
+    # Send reply back via Twilio
+    if settings.twilio_account_sid and settings.twilio_auth_token:
+        client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+        try:
+            client.messages.create(
+                body=ai_response,
+                from_=settings.twilio_whatsapp_number,
+                to=From
+            )
+        except Exception as e:
+            logger.error(f"Twilio error: {e}")
+
+    return "OK"
 
 if __name__ == "__main__":
     import uvicorn
