@@ -1,9 +1,8 @@
+from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from config import settings
-from utils.logger import get_logger
-
-logger = get_logger(__name__)
+from skills.toggl_skill import TogglSkill
 
 app = FastAPI(
     title="AI Productivity Orchestrator",
@@ -11,44 +10,44 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Request Models
 class TimerRequest(BaseModel):
     task_name: str
-    duration_minutes: int | None = None
+    duration_minutes: Optional[int] = None
+    workspace_id: str
 
 class SlackNotificationRequest(BaseModel):
     message: str
-    channel: str | None = None
+    channel: Optional[str] = None
 
 class AIProcessRequest(BaseModel):
     instruction: str
-    context: str | None = None
+    context: Optional[str] = None
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint to verify server status."""
-    logger.info("Health check requested")
     return {"status": "ok", "environment": settings.app_env}
 
 @app.post("/start-timer")
 async def start_timer(request: TimerRequest):
-    """Start a productivity timer (e.g., Toggl)."""
-    logger.info(f"Start timer requested for task: {request.task_name}")
-    # TODO: Integrate with toggl_skill
-    return {"status": "success", "message": f"Timer started for '{request.task_name}'"}
+    toggl_skill = TogglSkill()
+    duration_seconds = (request.duration_minutes * 60) if request.duration_minutes else -1
+    
+    result = toggl_skill.start_timer(
+        description=request.task_name,
+        duration=duration_seconds,
+        workspace_id=request.workspace_id
+    )
+    
+    if result.get("success"):
+        return {"status": "success", "message": f"Timer started for '{request.task_name}'", "data": result.get("data")}
+    raise HTTPException(status_code=400, detail=f"Failed to start timer: {result.get('error')}")
 
 @app.post("/slack-notify")
 async def slack_notify(request: SlackNotificationRequest):
-    """Send a notification via Slack."""
-    logger.info(f"Slack notification requested. Message length: {len(request.message)}")
-    # TODO: Integrate with slack_skill
     return {"status": "success", "message": "Notification queued"}
 
 @app.post("/ai-process")
 async def ai_process(request: AIProcessRequest):
-    """Process an instruction using AI."""
-    logger.info(f"AI processing requested. Instruction: {request.instruction[:50]}...")
-    # TODO: Integrate with ai_router
     return {"status": "success", "result": "AI processing complete"}
 
 if __name__ == "__main__":
