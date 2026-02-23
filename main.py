@@ -102,7 +102,7 @@ async def whatsapp_webhook(
         toggl_skill = TogglSkill()
         slack_skill = SlackSkill()
         
-        toggl_skill.start_timer("Deep Work", 7200, "0000000")
+        toggl_skill.start_timer("Deep Work", 7200, str(settings.toggl_workspace_id))
         
         slack_skill.send_slack_message(settings.slack_default_channel, f"🚀 Started 2 hours of Deep Work via WhatsApp! Task: {user_message}")
         
@@ -132,7 +132,7 @@ def daily_productivity_briefing() -> dict:
     slack_res = slack.send_slack_message(settings.slack_default_channel, "🌅 Good morning! Starting your daily briefing and activating deep work mode.")
 
     toggl = TogglSkill()
-    toggl_res = toggl.start_timer("Deep Work - Morning Briefing", 7200, "0000000")
+    toggl_res = toggl.start_timer("Deep Work - Morning Briefing", 7200, str(settings.toggl_workspace_id))
 
     gemini = GeminiService()
     ai_plan = gemini.generate_response("Give me a short, highly motivational 3-sentence productivity plan for the day.")

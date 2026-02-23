@@ -6,12 +6,12 @@ from config import settings
 
 class TogglSkill:
     def __init__(self):
-        self.api_key = settings.toggl_api_key
+        self.api_key = settings.toggl_api_token
         self.base_url = "https://api.track.toggl.com/api/v9"
 
     def _get_headers(self) -> dict[str, str]:
         if not self.api_key:
-            raise ValueError("TOGGL_API_KEY is missing configuration.")
+            raise ValueError("TOGGL_API_TOKEN is missing configuration.")
         
         auth_string = f"{self.api_key}:api_token"
         encoded_auth = base64.b64encode(auth_string.encode()).decode()
@@ -22,7 +22,7 @@ class TogglSkill:
 
     def start_timer(self, description: str, duration: int, workspace_id: str) -> dict[str, Any]:
         if not self.api_key:
-            return {"error": "TOGGL_API_KEY not configured", "success": False}
+            return {"error": "TOGGL_API_TOKEN not configured", "success": False}
 
         url = f"{self.base_url}/workspaces/{workspace_id}/time_entries"
         
