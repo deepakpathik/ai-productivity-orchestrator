@@ -1,4 +1,3 @@
-from typing import Any
 from services.gemini_service import GeminiService
 from services.claude_service import ClaudeService
 from skills.toggl_skill import TogglSkill
@@ -14,7 +13,6 @@ class AIRouter:
         self.email = EmailSkill()
 
     def process_text(self, text: str) -> dict[str, str]:
-        # Simple word count logic
         word_count = len(text.split())
         
         if word_count > 500:

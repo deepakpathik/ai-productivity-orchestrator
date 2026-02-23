@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Any
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from config import settings

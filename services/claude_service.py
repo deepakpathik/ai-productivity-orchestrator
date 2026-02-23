@@ -1,5 +1,3 @@
-from typing import Optional
-from typing import Any
 import anthropic
 from config import settings
 

@@ -1,5 +1,3 @@
-from typing import Optional
-from typing import Any
 import google.generativeai as genai
 from config import settings
 
