@@ -20,8 +20,7 @@ class SlackNotificationRequest(BaseModel):
     channel: Optional[str] = None
 
 class AIProcessRequest(BaseModel):
-    instruction: str
-    context: Optional[str] = None
+    text: str
 
 @app.get("/health")
 async def health_check():
@@ -58,9 +57,17 @@ async def slack_notify(request: SlackNotificationRequest):
         return {"status": "success", "message": f"Notification sent to {target_channel}"}
     raise HTTPException(status_code=400, detail=f"Failed to send Slack message: {result.get('error')}")
 
+from skills.ai_router import AIRouter
+
 @app.post("/ai-process")
 async def ai_process(request: AIProcessRequest):
-    return {"status": "success", "result": "AI processing complete"}
+    router = AIRouter()
+    result = router.process_text(request.text)
+    
+    return {
+        "model_used": result["model_used"],
+        "response": result["response"]
+    }
 
 if __name__ == "__main__":
     import uvicorn
