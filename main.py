@@ -48,7 +48,7 @@ from skills.slack_skill import SlackSkill
 @app.post("/slack-notify")
 async def slack_notify(request: SlackNotificationRequest):
     slack_skill = SlackSkill()
-    target_channel = request.channel if request.channel else "#general"
+    target_channel = request.channel if request.channel else settings.slack_default_channel
     
     result = slack_skill.send_slack_message(
         channel=target_channel,
@@ -104,7 +104,7 @@ async def whatsapp_webhook(
         
         toggl_skill.start_timer("Deep Work", 7200, "0000000")
         
-        slack_skill.send_slack_message("#general", f"🚀 Started 2 hours of Deep Work via WhatsApp! Task: {user_message}")
+        slack_skill.send_slack_message(settings.slack_default_channel, f"🚀 Started 2 hours of Deep Work via WhatsApp! Task: {user_message}")
         
         ai_response = f"✅ Started deep work timer for 2 hours and notified Slack!\n\nOriginal request: {user_message}"
     else:
@@ -129,7 +129,7 @@ from services.gemini_service import GeminiService
 
 def daily_productivity_briefing() -> dict:
     slack = SlackSkill()
-    slack_res = slack.send_slack_message("#general", "🌅 Good morning! Starting your daily briefing and activating deep work mode.")
+    slack_res = slack.send_slack_message(settings.slack_default_channel, "🌅 Good morning! Starting your daily briefing and activating deep work mode.")
 
     toggl = TogglSkill()
     toggl_res = toggl.start_timer("Deep Work - Morning Briefing", 7200, "0000000")

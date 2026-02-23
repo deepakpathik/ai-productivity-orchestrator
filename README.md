@@ -1,10 +1,11 @@
-# AI Productivity Orchestrator 🚀
+see
+# AI Productivity Orchestrator
 
 > **An autonomous, intelligent backend layer that bridges natural language tasks with real-world productivity tools.**
 
 The **AI Productivity Orchestrator** is a robust FastAPI-based backend designed to streamline day-to-day work processes. By combining Large Language Models (LLMs) with common productivity APIs, it acts as a central hub for starting timers, sending notifications, summarizing workloads, and executing daily briefings—all via natural language or automated webhooks.
 
-## 🌟 Resume-Ready Description
+## Resume-Ready Description
 
 **AI Productivity Orchestrator**
 *Developed a scalable, asynchronous FastAPI application that orchestrates cross-platform productivity tasks using LLMs.*
@@ -13,7 +14,7 @@ The **AI Productivity Orchestrator** is a robust FastAPI-based backend designed 
 * **Smart Automations**: Designed automated workflows, including a "Morning Briefing" protocol that triggers deep work timers, sends Slack broadcasts, and synthesizes motivational AI plans in a single sequence.
 * **Architecture**: Built using a clean, extensible pattern separating `services` (LLMs), `skills` (third-party APIs), and application logic.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The project is built on **FastAPI** to benefit from native asynchronous endpoints, Python type hints, and automatic API documentation (Swagger UI). 
 
@@ -22,7 +23,7 @@ The codebase separates concerns logically into:
 * **`skills/`**: Encapsulated modules that execute actions on third-party platforms (Email, Slack, Toggl).
 * **Routing logic (`AI Router`)**: A middleware controller that evaluates user prompt complexity (via word count) to determine the most efficient LLM.
 
-## 🔌 Integrated Services
+## Integrated Services
 
 1. **Slack**: Broadcasts notifications to designated channels using the official `slack_sdk`.
 2. **Toggl Track**: Initiates time entries for specific workspaces via direct HTTP calls to the Toggl REST API v9.
@@ -31,20 +32,20 @@ The codebase separates concerns logically into:
 5. **Email (SMTP)**: Handles outbound structured email delivery using Python's native `smtplib`.
 6. **WhatsApp (Twilio)**: Exposes a webhook to receive inbound WhatsApp messages, process them through the AI router, and reply natively via Twilio's messaging API.
 
-## 🧠 How AI Routing Works
+## How AI Routing Works
 
 The `AIRouter` is a dynamic dependency that inspects incoming text requests. 
 - For prompts under **500 words**, the router favors execution speed and cost-effectiveness by delegating the generation to **Gemini**. 
 - For heavier payloads or prompts with extensive context exceeding **500 words**, the router forwards the request to **Claude**, leveraging its larger context window capabilities.
 
-## ⏱️ How the Toggl REST API is Used
+## How the Toggl REST API is Used
 
 The Toggl integration leverages the **Toggl API v9**. It constructs authenticated HTTP requests using basic authentication, encoding the provided `TOGGL_API_KEY` combined with the standard `api_token` string. 
 Upon receiving a request mapping a duration, workspace, and task description, it constructs the necessary JSON payload with localized ISO 8601 UTC timestamps, ensuring exact tracking within the user's Toggl dashboard.
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 *(Replace these placeholders with your actual application screenshots)*
 
@@ -58,7 +59,7 @@ Upon receiving a request mapping a duration, workspace, and task description, it
 
 ---
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 ### 1. Prerequisites
 - Python 3.9+
@@ -98,7 +99,7 @@ ngrok http 8000
 
 ---
 
-## 📡 Demo API Endpoints
+## Demo API Endpoints
 
 Once the server is running, navigate to `http://localhost:8000/docs` to test:
 

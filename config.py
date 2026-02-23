@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     
     toggl_api_key: Optional[str] = None
     slack_bot_token: Optional[str] = None
+    slack_default_channel: str = "#test-bot"
     gemini_api_key: Optional[str] = None
     claude_api_key: Optional[str] = None
     
