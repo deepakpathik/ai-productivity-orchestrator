@@ -42,9 +42,21 @@ async def start_timer(request: TimerRequest):
         return {"status": "success", "message": f"Timer started for '{request.task_name}'", "data": result.get("data")}
     raise HTTPException(status_code=400, detail=f"Failed to start timer: {result.get('error')}")
 
+from skills.slack_skill import SlackSkill
+
 @app.post("/slack-notify")
 async def slack_notify(request: SlackNotificationRequest):
-    return {"status": "success", "message": "Notification queued"}
+    slack_skill = SlackSkill()
+    target_channel = request.channel if request.channel else "#general"
+    
+    result = slack_skill.send_slack_message(
+        channel=target_channel,
+        message=request.message
+    )
+    
+    if result.get("success"):
+        return {"status": "success", "message": f"Notification sent to {target_channel}"}
+    raise HTTPException(status_code=400, detail=f"Failed to send Slack message: {result.get('error')}")
 
 @app.post("/ai-process")
 async def ai_process(request: AIProcessRequest):

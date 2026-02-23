@@ -22,7 +22,7 @@ class AIRouter:
                 return f"Routed to Toggl and started timer: {result['data'].get('id')}."
             return f"Failed to start Toggl timer: {result.get('error')}"
         elif "slack" in lower_instruction or "message" in lower_instruction:
-            self.slack.send_message(instruction)
+            self.slack.send_slack_message("#general", instruction)
             return "Routed to Slack to send message."
         elif "email" in lower_instruction:
             self.email.send_email("user@example.com", "Task Update", instruction)
